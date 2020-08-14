@@ -20,7 +20,6 @@ class Chromosome:
         return '\nChromosome : {!r}'.format(self.chromosome) \
                + '\ncost : {} '.format(self.fitness_cost) \
                + 'pieces : {}'.format(self.fitness_piece) \
-               + '\ndominated : {!r}'.format(self.dominated_list) \
                + '\nP-rank : {}'.format(self.pareto_rank) \
                + ' CD : {}'.format(self.crowding_score)
 
