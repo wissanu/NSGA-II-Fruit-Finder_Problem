@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
         # create next generation
         while len(next_list) < pop_num:
-            # create object child1 and child2
+            # create object parent1 and parent2
             parent1 = Chromosome(gene_num, pop_num, max_count_item)
             parent2 = Chromosome(gene_num, pop_num, max_count_item)
 
