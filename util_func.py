@@ -1,3 +1,4 @@
+# created own min() and max() function instead of using built-in function
 
 def M_min(chromosome_list, status):
     if status == 'cost':
