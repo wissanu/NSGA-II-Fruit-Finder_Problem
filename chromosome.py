@@ -48,13 +48,13 @@ class Chromosome:
         self.fitness_piece = sum([x for x in self.chromosome])
 
     @staticmethod
-    def tournament_selection(versus, chromosome, pop_num):
+    def tournament_selection(versus, chromosome_list, pop_num):
         k = [randint(0, pop_num - 1) for _ in range(int(versus * pop_num))]
-        best = None
+        best = []
         for _ in k:
-            if not best or best.pareto_rank < chromosome[_].pareto_rank:
-                best = chromosome[_]
-            elif best.pareto_rank == chromosome[_].pareto_rank:
-                if best.crowding_score < chromosome[_].crowding_score:
-                    best = chromosome[_]
+            if not best or best.pareto_rank < chromosome_list[_].pareto_rank:
+                best = chromosome_list[_].chromosome.copy()
+            elif best.pareto_rank == chromosome_list[_].pareto_rank:
+                if best.crowding_score < chromosome_list[_].crowding_score:
+                    best = chromosome_list[_].chromosome.copy()
             return best
