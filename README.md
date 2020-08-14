@@ -3,7 +3,8 @@
 Finding a total pieces of five fruit that won't exceed 1000 baht.
 In each of fruit has cost. 
 
-This version is implemented on NSGA-II for solving multi objective.
+This version is implemented on NSGA-II for solving multi objective and the result shows through graph with difference colors
+for easy to interpret the Front-Pareto level and so on.
 
 NoTE: cost and pieces constrant can be raise.
 
