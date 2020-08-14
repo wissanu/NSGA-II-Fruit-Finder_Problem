@@ -4,6 +4,7 @@ from Fruit_NSGAII import util_func as uf
 def crowding_score(chromosome_list):
 
     global last_index
+    # get min and max value from cost and piece fitness
     min_cost = uf.M_min(chromosome_list, 'cost')
     max_cost = uf.M_max(chromosome_list, 'cost')
     min_piece = uf.M_min(chromosome_list, 'piece')
