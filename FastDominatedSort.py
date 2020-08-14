@@ -10,8 +10,8 @@ def fast_non_dominate_sorting(chromosome_list):
     Chromosome.status = 'niche-sort'
     chromosome_list = sorted(chromosome_list)
 
-    # get dominated list ( non-dominate count )
-    # !!! This method need to be sorted first. !!!!
+    # get dominated list ( dominated by whom!!)
+    # !!! The collector need to be sorted before finding dominated solution !!!!
     for x in chromosome_list:
         x.dominated_list = [1 if y.fitness_cost > x.fitness_cost and y.fitness_piece > x.fitness_piece else 0 for y in chromosome_list]
 
