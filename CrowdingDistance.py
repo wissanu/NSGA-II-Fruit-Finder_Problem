@@ -3,8 +3,6 @@ from Fruit_NSGAII import util_func as uf
 
 def crowding_score(chromosome_list):
 
-    global last_index
-    # get min and max value from cost and piece fitness
     min_cost = uf.M_min(chromosome_list, 'cost')
     max_cost = uf.M_max(chromosome_list, 'cost')
     min_piece = uf.M_min(chromosome_list, 'piece')
@@ -15,10 +13,7 @@ def crowding_score(chromosome_list):
     # create range of index in each pareto front.
     # ( For simplify an implementation of calculated crowding distance )
     for p_rank in range(1, last_p_rank + 1):
-        sum_of_pareto_front = 0
-        for obj in chromosome_list:
-            if p_rank == obj.pareto_rank:
-                sum_of_pareto_front += 1
+        sum_of_pareto_front = sum([1 for obj in chromosome_list if p_rank == obj.pareto_rank])
 
         if p_rank == 1:
             front_set_index.append((0, sum_of_pareto_front - 1))
