@@ -9,10 +9,10 @@ for easy to interpret the Front-Pareto level and so on.
 NoTE: cost and pieces constrant can be raise.
 
 Method included
-- Tournament Selection ( the candidate is 20% from total population ) (both)
+- Tournament Selection ( the candidate is 20% from total population )
+- single point crossover
 - mutation swap
 - crossove and mutation rate , 70% and 10%
-
 
 Constrain
 - 0 <= x1,x2,x3,x4,x5 <= 15
