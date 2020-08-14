@@ -1,60 +1,124 @@
-from random import sample, randint
+from Fruit_NSGAII.chromosome import Chromosome
+from Fruit_NSGAII import Reproduce as ga
+from Fruit_NSGAII import plot_graph as pg
+from Fruit_NSGAII import FastDominatedSort as metd
+from Fruit_NSGAII import CrowdingDistance as cd
+from random import random
 
+# -------- Setting parameter --------
+gene_num = 5
+pop_num = 50
+versus = 0.2
+max_count_item = 15
+number_generation = 1000
+crossover_rate = 0.7
+mutation_rate = 0.1
+# ------------ Don't change ---------------
+current_list = []
+best_chromosome = []
+best_fitness_cost = -1
+best_fitness_piece = -1
 
-class Chromosome:
-    status = ''
+if __name__ == '__main__':
 
-    def __init__(self, x_gene, x_pop, max_count_item):
-        self.chromosome = []
-        self.gene_num = x_gene
-        self.pop_num = x_pop
-        self.fitness_cost = 0
-        self.fitness_piece = 0
-        self.niche_score = 0
-        self.pareto_rank = 0
-        self.crowding_score = 0
-        self.dominated_list = []
-        self.equation_input = [10, 5, 30, 50, 55]
-        self.max_count_item = max_count_item
+    # create initial pop
+    for _ in range(pop_num):
+        g = Chromosome(gene_num, pop_num, max_count_item)
+        g.initial_pop()
+        current_list.append(g)
 
-    def __repr__(self):
-        return '\nChromosome : {!r}'.format(self.chromosome) \
-               + '\ncost : {} '.format(self.fitness_cost) \
-               + 'pieces : {}'.format(self.fitness_piece) \
-               + '\nP-rank : {}'.format(self.pareto_rank) \
-               + ' CD : {}'.format(self.crowding_score)
+    # calculate niche score & pareto rank || calculate crowding distance
+    current_list = metd.fast_non_dominate_sorting(current_list)
+    current_list = cd.crowding_score(current_list)
 
-    def __lt__(self, other):
-        if Chromosome.status == 'niche-sort':
-            if self.niche_score != other.niche_score:
-                return self.niche_score < other.niche_score
+    # generation loop start
+    for gen in range(1, number_generation + 1):
+        print('generation', gen)
+
+        next_list = []
+
+        # create next generation
+        while len(next_list) < pop_num:
+            # create object child1 and child2
+            parent1 = Chromosome(gene_num, pop_num, max_count_item)
+            parent2 = Chromosome(gene_num, pop_num, max_count_item)
+
+            # select parents
+            parent1.chromosome = Chromosome.tournament_selection(versus, current_list, pop_num)
+            parent2.chromosome = Chromosome.tournament_selection(versus, current_list, pop_num)
+
+            # create object child1 and child2
+            child1 = Chromosome(gene_num, pop_num, max_count_item)
+            child2 = Chromosome(gene_num, pop_num, max_count_item)
+
+            # Crossover process
+            if random() < crossover_rate:
+                # Do crossover
+                child1.chromosome, child2.chromosome = ga.single_point(parent1.chromosome, parent2.chromosome, gene_num)
             else:
-                if self.fitness_cost != other.fitness_cost:
-                    return self.fitness_cost > other.fitness_cost
-                elif self.fitness_cost == other.fitness_cost:
-                    return self.fitness_piece > other.fitness_piece
-        if Chromosome.status == 'pareto-sort':
-            return self.pareto_rank < other.pareto_rank
+                # Use parent as child instead
+                child1.chromosome = parent1.chromosome.copy()
+                child2.chromosome = parent2.chromosome.copy()
 
-    def initial_pop(self):
-        while True:
-            self.chromosome = sample(range(0, self.max_count_item), self.gene_num)
-            self.fitness_finder()
-            if self.fitness_cost <= 1000:
-                break
+            # Mutation process
+            if random() < mutation_rate:
+                child1.chromosome = ga.mutation(child1.chromosome, max_count_item, gene_num)
+                child2.chromosome = ga.mutation(child2.chromosome, max_count_item, gene_num)
 
-    def fitness_finder(self):
-        self.fitness_cost = sum([x * y for x, y in zip(self.chromosome, self.equation_input)])
-        self.fitness_piece = sum([x for x in self.chromosome])
+            # calculate fitness
+            child1.fitness_finder()
+            child2.fitness_finder()
 
-    @staticmethod
-    def tournament_selection(versus, chromosome_list, pop_num):
-        k = [randint(0, pop_num - 1) for _ in range(int(versus * pop_num))]
-        best = []
-        for _ in k:
-            if not best or best.pareto_rank < chromosome_list[_].pareto_rank:
-                best = chromosome_list[_].chromosome.copy()
-            elif best.pareto_rank == chromosome_list[_].pareto_rank:
-                if best.crowding_score < chromosome_list[_].crowding_score:
-                    best = chromosome_list[_].chromosome.copy()
-            return best
+            # check duplicate and constraint
+            if child1.fitness_cost <= 1000 and len(next_list) < pop_num:
+                check_dup_P = [1 for _ in current_list if child1.chromosome != _.chromosome]
+                check_dup_Q = [1 for _ in next_list if child1.chromosome != _.chromosome]
+                if (sum(check_dup_P)+sum(check_dup_Q)) == (len(next_list)+len(current_list)):
+                    next_list.append(child1)
+
+            if child2.fitness_cost <= 1000 and len(next_list) < pop_num:
+                check_dup_P = [1 for _ in current_list if child2.chromosome != _.chromosome]
+                check_dup_Q = [1 for _ in next_list if child2.chromosome != _.chromosome]
+                if (sum(check_dup_P)+sum(check_dup_Q)) == (len(next_list)+len(current_list)):
+                    next_list.append(child2)
+
+        # combine parent and child population into one.
+        totalChunk = []
+        for s in current_list:
+            totalChunk.append(s)
+        for dd in next_list:
+            totalChunk.append(dd)
+
+        # calculate niche score & pareto rank || calculate crowding distance
+        totalChunk = metd.fast_non_dominate_sorting(totalChunk)
+        totalChunk = cd.crowding_score(totalChunk)
+
+        # clear memory and reuse current_list
+        current_list.clear()
+        del next_list
+
+        # divide half top into new parent population
+        for _ in range(len(totalChunk)//2):
+            current_list.append(totalChunk[_])
+
+        # clear memory
+        del totalChunk
+
+        #print(*current_list)
+
+    # get best chromosome and fitness
+    best_chromosome = current_list[0].chromosome.copy()
+    best_fitness_cost = current_list[0].fitness_cost
+    best_fitness_piece = current_list[0].fitness_piece
+
+    # ==== Result ====
+    print("================")
+    print('best chromosome : {!r}'.format(best_chromosome) + '\nbest cost : {}'.format(best_fitness_cost) + '\nbest piece : {}'.format(best_fitness_piece))
+    print('Banana : {} pieces'.format(best_chromosome[0]) + ' per 10 baht')
+    print('Orange : {} pieces'.format(best_chromosome[1]) + ' per 5 baht')
+    print('Apple : {} pieces'.format(best_chromosome[2]) + ' per 30 baht')
+    print('Melon : {} pieces'.format(best_chromosome[3]) + ' per 50 baht')
+    print('Berry : {} pieces'.format(best_chromosome[4]) + ' per 55 baht')
+
+    # plot graph
+    pg.plot_graph(current_list, 5)
