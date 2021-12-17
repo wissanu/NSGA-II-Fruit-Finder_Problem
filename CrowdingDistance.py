@@ -12,6 +12,7 @@ def crowding_score(chromosome_list):
 
     # create range of index in each pareto front.
     # ( For simplify an implementation of calculated crowding distance )
+    # rank started at 1 to N, for N = last pareto rank of individual in each generation.
     for p_rank in range(1, last_p_rank + 1):
         sum_of_pareto_front = sum([1 for obj in chromosome_list if p_rank == obj.pareto_rank])
 
